@@ -1,7 +1,7 @@
 #include "display.h"
 #include "py/mphal.h"
 
-// ST7735 initialization sequence
+// st7735 initialization sequence
 typedef struct {
     uint8_t cmd;
     uint8_t len;
@@ -33,8 +33,9 @@ static const st7735_init_cmd_t st7735_init_sequence[] = {
 };
 
 static void st7735_init(mp_display_obj_t *self) {
-    if (self->rst != MP_OBJ_NULL) display_reset_hw(self);
-
+    if (self->rst != (mp_hal_pin_obj_t)-1) {
+        display_reset_hw(self);
+    }
     for (const st7735_init_cmd_t *entry = st7735_init_sequence; entry->cmd != 0x00; entry++) {
         if (entry->len > 0) {
             display_send_cmd_data(self, entry->cmd, entry->data, entry->len);

@@ -3,14 +3,15 @@
 
 #include "py/obj.h"
 #include "py/runtime.h"
+#include "py/mphal.h"
 
 typedef struct _mp_display_obj_t {
     mp_obj_base_t base;
     mp_obj_t spi;
-    mp_obj_t dc;
-    mp_obj_t cs;
-    mp_obj_t rst;
-    mp_obj_t bl;
+    mp_hal_pin_obj_t dc;
+    mp_hal_pin_obj_t cs;
+    mp_hal_pin_obj_t rst;
+    mp_hal_pin_obj_t bl;
     bool backlight_active_high;
     bool bgr;
     uint16_t width;

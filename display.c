@@ -4,34 +4,23 @@
 #include "extmod/virtpin.h"
 #include "extmod/modmachine.h"
 
-#define CS_LOW(self) if ((self)->cs != MP_OBJ_NULL) mp_hal_pin_write(mp_hal_get_pin_obj((self)->cs), 0)
-#define CS_HIGH(self) if ((self)->cs != MP_OBJ_NULL) mp_hal_pin_write(mp_hal_get_pin_obj((self)->cs), 1)
-#define DC_LOW(self) mp_hal_pin_write(mp_hal_get_pin_obj((self)->dc), 0)
-#define DC_HIGH(self) mp_hal_pin_write(mp_hal_get_pin_obj((self)->dc), 1)
+#define CS_LOW(self)  if ((self)->cs != -1) mp_hal_pin_write((self)->cs, 0)
+#define CS_HIGH(self) if ((self)->cs != -1) mp_hal_pin_write((self)->cs, 1)
+#define DC_LOW(self)  mp_hal_pin_write((self)->dc, 0)
+#define DC_HIGH(self) mp_hal_pin_write((self)->dc, 1)
 
 static void display_cs_low(mp_display_obj_t *self) { CS_LOW(self); }
 static void display_cs_high(mp_display_obj_t *self) { CS_HIGH(self); }
 
-//static void spi_write(mp_obj_t spi_obj, const uint8_t *data, size_t len) {
-//    mp_obj_t bytearray = mp_obj_new_bytearray_by_ref(len, (void *)data);
-//    mp_obj_t args[1] = { bytearray };
-//    mp_call_method_n_kw(1, 0, args, &spi_obj, MP_OBJ_NULL, MP_QSTR_write);
-//}
-
-//static void spi_write(mp_obj_t spi_obj, const uint8_t *data, size_t len) {
-//    mp_obj_t dest[3];
-//    mp_load_method(spi_obj, MP_QSTR_write, dest);
-//    dest[2] = mp_obj_new_bytearray_by_ref(len, (void *)data);
-//    mp_call_method_n_kw(1, 0, dest);
-//}
 
 void spi_write(mp_obj_t spi_obj, const uint8_t *data, size_t len) {
+    if (len == 0) return;
     mp_obj_base_t *s = (mp_obj_base_t *)MP_OBJ_TO_PTR(spi_obj);
-    mp_machine_spi_p_t *spi_p = (mp_machine_spi_p_t *)s->type->protocol;
-    // Прямой вызов драйвера SPI без участия интерпретатора Python
-    spi_p->transfer(s, len, data, NULL);
+    mp_machine_spi_p_t *spi_p = (mp_machine_spi_p_t *)MP_OBJ_TYPE_GET_SLOT(s->type, protocol);
+    if (spi_p && spi_p->transfer) {
+        spi_p->transfer(s, len, data, NULL);
+    }
 }
-
 
 void display_send_cmd(mp_display_obj_t *self, uint8_t cmd) {
     display_cs_low(self);
@@ -53,12 +42,11 @@ void display_send_cmd_data(mp_display_obj_t *self, uint8_t cmd, const uint8_t *d
 }
 
 void display_reset_hw(mp_display_obj_t *self) {
-    if (self->rst != MP_OBJ_NULL) {
-        mp_hal_pin_obj_t rst_pin = mp_hal_get_pin_obj(self->rst);
-        mp_hal_pin_write(rst_pin, 0);
-        mp_hal_delay_ms(10);
-        mp_hal_pin_write(rst_pin, 1);
-        mp_hal_delay_ms(10);
+    if (self->rst != (mp_hal_pin_obj_t)-1) {
+        mp_hal_pin_write(self->rst, 0);
+        mp_hal_delay_ms(50);
+        mp_hal_pin_write(self->rst, 1);
+        mp_hal_delay_ms(50);
     }
 }
 
@@ -109,19 +97,22 @@ mp_obj_t display_make_new_base(const mp_obj_type_t *type, size_t n_args, size_t 
     self->spi = args[ARG_spi].u_obj;
     self->width = args[ARG_width].u_int;
     self->height = args[ARG_height].u_int;
-    self->dc = args[ARG_dc].u_obj;
-    self->cs = args[ARG_cs].u_obj;
-    self->rst = args[ARG_rst].u_obj;
-    self->bl = args[ARG_bl].u_obj;
+    self->dc = mp_hal_get_pin_obj(args[ARG_dc].u_obj);
+    self->cs = (args[ARG_cs].u_obj != MP_OBJ_NULL) ? mp_hal_get_pin_obj(args[ARG_cs].u_obj) : (mp_hal_pin_obj_t)-1;
+    self->rst = (args[ARG_rst].u_obj != MP_OBJ_NULL) ? mp_hal_get_pin_obj(args[ARG_rst].u_obj) : (mp_hal_pin_obj_t)-1;
+    self->bl = (args[ARG_bl].u_obj != MP_OBJ_NULL) ? mp_hal_get_pin_obj(args[ARG_bl].u_obj) : (mp_hal_pin_obj_t)-1;
     self->bgr = args[ARG_bgr].u_bool;
     self->backlight_active_high = args[ARG_backlight_active_high].u_bool;
     self->rotation = args[ARG_rotation].u_int;
     self->set_rotation_func = display_set_rotation_default;
 
-    mp_hal_pin_output(mp_hal_get_pin_obj(self->dc));
-    if (self->cs != MP_OBJ_NULL) mp_hal_pin_output(mp_hal_get_pin_obj(self->cs));
-    if (self->rst != MP_OBJ_NULL) mp_hal_pin_output(mp_hal_get_pin_obj(self->rst));
-    if (self->bl != MP_OBJ_NULL) mp_hal_pin_output(mp_hal_get_pin_obj(self->bl));
+    mp_hal_pin_output(self->dc);
+    if (self->cs != (mp_hal_pin_obj_t)-1) mp_hal_pin_output(self->cs);
+    if (self->rst != (mp_hal_pin_obj_t)-1) mp_hal_pin_output(self->rst);
+    if (self->bl != (mp_hal_pin_obj_t)-1) {
+        mp_hal_pin_output(self->bl);
+        mp_hal_pin_write(self->bl, self->backlight_active_high);
+    }
     display_cs_high(self);
 
     self->buffer_size = (size_t)self->width * self->height * 2;
@@ -138,6 +129,7 @@ mp_obj_t display_make_new_base(const mp_obj_type_t *type, size_t n_args, size_t 
         self->buffer_allocated = true;
         self->buffer_obj = mp_obj_new_bytearray_by_ref(self->buffer_size, self->buffer);
     }
+
     return MP_OBJ_FROM_PTR(self);
 }
 
@@ -224,9 +216,13 @@ static MP_DEFINE_CONST_FUN_OBJ_3(display_cmd_data_obj, display_cmd_data);
 
 static mp_obj_t display_show(mp_obj_t self_in) {
     mp_display_obj_t *self = MP_OBJ_TO_PTR(self_in);
+    // Устанавливаем окно (здесь CS погуляет туда-сюда)
     display_set_window(self, 0, 0, self->width, self->height);
+    // Даем небольшую паузу "тишины" на шине (буквально пару микросекунд)
+    mp_hal_delay_us(10);
+    // Теперь зажимаем CS и шлем данные
     display_cs_low(self);
-    DC_HIGH(self); // Переходим в режим данных
+    DC_HIGH(self);
     spi_write(self->spi, self->buffer, self->buffer_size);
     display_cs_high(self);
     return mp_const_none;
@@ -258,12 +254,12 @@ static MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(display_update_rect_obj, 5, 5, displa
 
 static mp_obj_t display_set_backlight(mp_obj_t self_in, mp_obj_t percent_in) {
     mp_display_obj_t *self = MP_OBJ_TO_PTR(self_in);
-    if (self->bl == MP_OBJ_NULL) return mp_const_none;
+    if (self->bl == (mp_hal_pin_obj_t)-1) return mp_const_none;
     int percent = mp_obj_get_int(percent_in);
     if (percent < 0) percent = 0;
     if (percent > 100) percent = 100;
     bool active = (percent > 0) ? self->backlight_active_high : !self->backlight_active_high;
-    mp_hal_pin_write(mp_hal_get_pin_obj(self->bl), active ? 1 : 0);
+    mp_hal_pin_write(self->bl, active ? 1 : 0);
     return mp_const_none;
 }
 static MP_DEFINE_CONST_FUN_OBJ_2(display_set_backlight_obj, display_set_backlight);
