@@ -10,6 +10,7 @@
 #include "extmod/modmachine.h"
 #include "py/obj.h"
 #include "py/runtime.h"
+#include "fonts.h"
 #include <stdio.h>
 
 #define CS_LOW(self)  if ((self)->cs != (mp_hal_pin_obj_t)-1) mp_hal_pin_write((self)->cs, 0)
@@ -291,6 +292,19 @@ void display_attr(mp_obj_t self_in, qstr attr, mp_obj_t *dest) {
         }
     }
 }
+
+static mp_obj_t display_text(size_t n_args, const mp_obj_t *args) {
+    mp_display_obj_t *self = MP_OBJ_TO_PTR(args[0]);
+    const char *str = mp_obj_str_get_str(args[1]);
+    int16_t x = mp_obj_get_int(args[2]);
+    int16_t y = mp_obj_get_int(args[3]);
+    uint16_t color = (uint16_t)mp_obj_get_int(args[4]);
+    int font_id = (n_args > 5) ? mp_obj_get_int(args[5]) : 0;
+    fonts_draw_text(self, str, x, y, color, font_id);
+    return mp_const_none;
+}
+MP_DEFINE_CONST_FUN_OBJ_VAR_BETWEEN(display_text_obj, 5, 6, display_text);
+
 static const mp_rom_map_elem_t display_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR___del__), MP_ROM_PTR(&display_del_obj) },
     { MP_ROM_QSTR(MP_QSTR_cmd), MP_ROM_PTR(&display_cmd_obj) },
@@ -299,6 +313,7 @@ static const mp_rom_map_elem_t display_locals_dict_table[] = {
     { MP_ROM_QSTR(MP_QSTR_update_rect), MP_ROM_PTR(&display_update_rect_obj) },
     { MP_ROM_QSTR(MP_QSTR_set_backlight), MP_ROM_PTR(&display_set_backlight_obj) },
     { MP_ROM_QSTR(MP_QSTR_reset), MP_ROM_PTR(&display_reset_obj) },
+    { MP_ROM_QSTR(MP_QSTR_text ), MP_ROM_PTR(&display_text_obj) },
 };
 static MP_DEFINE_CONST_DICT(display_locals_dict, display_locals_dict_table);
 

@@ -5,6 +5,7 @@
 #include "py/obj.h"
 #include "py/runtime.h"
 #include "py/mphal.h"
+#include "fonts.h"
 
 typedef struct _mp_display_obj_t {
     mp_obj_base_t base;
@@ -34,6 +35,7 @@ void display_reset_hw(mp_display_obj_t *self);
 void display_set_rotation_default(mp_display_obj_t *self, uint8_t rot);
 void display_attr(mp_obj_t self_in, qstr attr, mp_obj_t *dest);
 void display_set_window(mp_display_obj_t *self, uint16_t x, uint16_t y, uint16_t w, uint16_t h);
+void fonts_draw_text(mp_display_obj_t *self, const char *str, int16_t x, int16_t y, uint16_t color, int font_id);
 size_t display_get_pixel_offset(mp_display_obj_t *self, uint16_t x, uint16_t y);
 mp_obj_t display_make_new_base(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args);
 
