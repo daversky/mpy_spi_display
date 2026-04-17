@@ -1,3 +1,10 @@
+/*
+ * MicroPython ST7735 Driver
+ *
+ * Core logic & initial setup: DeepSeek AI
+ * Architecture fix, Cross-platform & GFX Fonts: Google Gemini
+ * Integration & Hardware testing: [daversky]
+ */
 // spi_displays/modspidisplay.c
 #include "py/runtime.h"
 #include "py/obj.h"

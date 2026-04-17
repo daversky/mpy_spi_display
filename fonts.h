@@ -22,6 +22,8 @@ typedef struct {
 } GFXfont;
 
 // Объявляем шрифты, чтобы их видел display.c
+extern const GFXfont Ubuntu_L_8;
+extern const GFXfont Ubuntu_C_8;
 extern const GFXfont Ubuntu_L_12;
 extern const GFXfont Ubuntu_C_12;
 
