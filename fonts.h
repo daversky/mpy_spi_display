@@ -22,9 +22,13 @@ typedef struct {
 } GFXfont;
 
 // Объявляем шрифты, чтобы их видел display.c
-extern const GFXfont Ubuntu_L_8;
-extern const GFXfont Ubuntu_C_8;
-extern const GFXfont Ubuntu_L_12;
-extern const GFXfont Ubuntu_C_12;
+extern const GFXfont Font_L_6;
+extern const GFXfont Font_C_6;
+extern const GFXfont Font_L_8;
+extern const GFXfont Font_C_8;
+extern const GFXfont Font_L_12;
+extern const GFXfont Font_C_12;
+extern const GFXfont Font_L_16;
+extern const GFXfont Font_C_16;
 
 #endif // MICROPY_INCLUDED_SPI_DISPLAYS_FONTS_H
