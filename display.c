@@ -4,8 +4,8 @@
 #include "py/objarray.h"
 #include "py/objtype.h"
 #include "extmod/virtpin.h"
-#if MICROPY_PY_MACHINE_RP2
-#include "hardware/spi.h"
+#ifdef PICO_BOARD
+    #include "hardware/spi.h"
 #endif
 #include "extmod/modmachine.h"
 #include "py/obj.h"
