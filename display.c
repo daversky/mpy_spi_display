@@ -191,6 +191,17 @@ mp_obj_t display_make_new_base(const mp_obj_type_t *type, size_t n_args, size_t 
     self->buffer_allocated = true;
     self->buffer_obj = mp_obj_new_bytearray_by_ref(self->buffer_size, self->buffer);
     self->draw = draw_make_new(self);
+    if (self->debug >= 2) {
+        mp_printf(&mp_plat_print, "Init parameters:\n");
+        mp_printf(&mp_plat_print, "  - width:                 %u\n", (unsigned int)width);
+        mp_printf(&mp_plat_print, "  - height:                %u\n", (unsigned int)height);
+        mp_printf(&mp_plat_print, "  - rotate:                %u\n", (unsigned int)rotate);
+        mp_printf(&mp_plat_print, "  - x_offset:              %d\n", (int)x_offset);
+        mp_printf(&mp_plat_print, "  - y_offset:              %d\n", (int)y_offset);
+        mp_printf(&mp_plat_print, "  - bgr:                   %s\n", self->bgr ? "True" : "False");
+        mp_printf(&mp_plat_print, "  - inverse:               %s\n", self->inverse ? "True" : "False");
+        mp_printf(&mp_plat_print, "  - backlight_active_high: %s\n", self->backlight_active_high ? "True" : "False");
+    }
     return MP_OBJ_FROM_PTR(self);
 }
 

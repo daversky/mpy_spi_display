@@ -54,6 +54,7 @@ static void st7789_init(mp_display_obj_t *self) {
             mp_hal_delay_ms(entry->delay);
         }
     }
+    display_write_cmd_data(self,  self->inverse ? 0x21 : 0x20, NULL, 0);
     display_set_window(self, 0, 0, self->width, self->height);
 }
 

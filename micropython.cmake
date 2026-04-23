@@ -5,6 +5,7 @@ target_sources(usermod_spi_displays INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/display.c
     ${CMAKE_CURRENT_LIST_DIR}/fonts.c
     ${CMAKE_CURRENT_LIST_DIR}/draw.c
+    ${CMAKE_CURRENT_LIST_DIR}/st7735.c
     ${CMAKE_CURRENT_LIST_DIR}/st7789.c
 )
 target_include_directories(usermod_spi_displays INTERFACE ${CMAKE_CURRENT_LIST_DIR})
