@@ -1,16 +1,10 @@
-/*
- * MicroPython ST7735 Driver
- *
- * Core logic & initial setup: DeepSeek AI
- * Architecture fix, Cross-platform & GFX Fonts: Google Gemini
- * Integration & Hardware testing: [daversky]
- */
 // spi_displays/modspidisplay.c
 #include "py/runtime.h"
 #include "py/obj.h"
 #include "display.h"
 
 extern const mp_obj_type_t mp_type_st7735;
+extern const mp_obj_type_t mp_type_st7789;
 
 static mp_obj_t display_color_rgb(mp_obj_t r_obj, mp_obj_t g_obj, mp_obj_t b_obj) {
     int r = mp_obj_get_int(r_obj);
@@ -27,10 +21,8 @@ MP_DEFINE_CONST_FUN_OBJ_3(display_color_rgb_obj, display_color_rgb);
 
 static const mp_rom_map_elem_t spi_displays_globals_table[] = {
     { MP_ROM_QSTR(MP_QSTR___name__), MP_ROM_QSTR(MP_QSTR_spi_displays) },
-    { MP_ROM_QSTR(MP_QSTR_Display), MP_ROM_PTR(&mp_type_display) },
-    { MP_ROM_QSTR(MP_QSTR_ST7735), MP_ROM_PTR(&mp_type_st7735) },
-    // Добавляем функцию color_rgb
-    { MP_ROM_QSTR(MP_QSTR_color_rgb), MP_ROM_PTR(&display_color_rgb_obj) },
+    { MP_ROM_QSTR(MP_QSTR_Display),  MP_ROM_PTR(&mp_type_display) },
+    { MP_ROM_QSTR(MP_QSTR_st7789),  MP_ROM_PTR(&mp_type_st7789) },
 };
 static MP_DEFINE_CONST_DICT(spi_displays_globals, spi_displays_globals_table);
 

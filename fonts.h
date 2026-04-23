@@ -3,25 +3,23 @@
 
 #include <stdint.h>
 
-// Чистые структуры формата Adafruit GFX
 typedef struct {
-    uint16_t bitmapOffset;     // Смещение в массиве битмапов
-    uint8_t  width;            // Ширина символа
-    uint8_t  height;           // Высота символа
-    uint8_t  xAdvance;         // Дистанция до следующего символа
-    int8_t   xOffset;          // Сдвиг по X
-    int8_t   yOffset;          // Сдвиг по Y (относительно Baseline)
+    uint16_t bitmapOffset;
+    uint8_t  width;
+    uint8_t  height;
+    uint8_t  xAdvance;
+    int8_t   xOffset;
+    int8_t   yOffset;
 } GFXglyph;
 
 typedef struct {
-    uint8_t  *bitmap;          // Указатель на массив битмапов
-    GFXglyph *glyph;           // Указатель на таблицу параметров символов
-    uint16_t   first;          // Код первого символа
-    uint16_t   last;           // Код последнего символа
-    uint8_t   yAdvance;        // Высота строки
+    uint8_t  *bitmap;
+    GFXglyph *glyph;
+    uint16_t   first;
+    uint16_t   last;
+    uint8_t   yAdvance;
 } GFXfont;
 
-// Объявляем шрифты, чтобы их видел display.c
 extern const GFXfont Font_L_6;
 extern const GFXfont Font_C_6;
 extern const GFXfont Font_L_8;
@@ -35,4 +33,4 @@ extern const GFXfont Font_C_20;
 extern const GFXfont Font_L_24;
 extern const GFXfont Font_C_24;
 
-#endif // MICROPY_INCLUDED_SPI_DISPLAYS_FONTS_H
+#endif
