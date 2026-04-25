@@ -24,7 +24,7 @@ static const display_init_cmd_t st7735_init_sequence[] = {
     {0x00, 0, 0, {}}
 };
 
-static uint8_t st7735_get_madctl_value(mp_display_obj_t *self) {
+static uint8_t st7735_get_madctl_value(mp_display_obj_t* self) {
     uint8_t madctl = self->bgr ? 0x08 : 0x00;
     switch (self->rotate) {
         case 0: madctl |= 0x00; break;
@@ -35,13 +35,13 @@ static uint8_t st7735_get_madctl_value(mp_display_obj_t *self) {
     return madctl;
 }
 
-static void st7735_init(mp_display_obj_t *self) {
-    if (self->rst != (mp_hal_pin_obj_t)-1) {
+static void st7735_init(mp_display_obj_t* self) {
+    if (self->rst != (mp_hal_pin_obj_t) - 1) {
         display_reset_hw(self);
     }
-    for (const display_init_cmd_t *entry = st7735_init_sequence; entry->cmd != 0x00; entry++) {
+    for (const display_init_cmd_t* entry = st7735_init_sequence; entry->cmd != 0x00; entry++) {
         uint8_t cmd = entry->cmd;
-        const uint8_t *data = entry->data;
+        const uint8_t* data = entry->data;
         uint8_t len = entry->len;
 
         uint8_t dynamic_data;
@@ -55,20 +55,20 @@ static void st7735_init(mp_display_obj_t *self) {
             mp_hal_delay_ms(entry->delay);
         }
     }
-    display_write_cmd_data(self,  self->inverse ? 0x21 : 0x20, NULL, 0);
+    display_write_cmd_data(self, self->inverse ? 0x21 : 0x20, NULL, 0);
     display_set_window(self, 0, 0, self->width, self->height);
 }
 
-static mp_obj_t st7735_make_new(const mp_obj_type_t *type, size_t n_args, size_t n_kw, const mp_obj_t *all_args) {
+static mp_obj_t st7735_make_new(const mp_obj_type_t* type, size_t n_args, size_t n_kw, const mp_obj_t* all_args) {
     // Создаем DisplayCore объект
     mp_obj_t display_obj = display_make_new_base(&mp_type_display_core, n_args, n_kw, all_args);
-    mp_display_obj_t *self = MP_OBJ_TO_PTR(display_obj);
+    mp_display_obj_t* self = MP_OBJ_TO_PTR(display_obj);
     st7735_init(self);
     self->base.type = type;
     return display_obj;
 }
 
-static const mp_rom_map_elem_t st7735_locals_dict_table[] = { };
+static const mp_rom_map_elem_t st7735_locals_dict_table[] = {};
 static MP_DEFINE_CONST_DICT(st7735_locals_dict, st7735_locals_dict_table);
 
 MP_DEFINE_CONST_OBJ_TYPE(

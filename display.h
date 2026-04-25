@@ -31,7 +31,7 @@ typedef struct _mp_display_obj_t {
 typedef struct {
     uint8_t cmd;
     uint8_t len;
-    uint16_t delay;  // delay в миллисекундах
+    uint16_t delay; // delay в миллисекундах
     uint8_t data[16];
 } display_init_cmd_t;
 

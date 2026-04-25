@@ -1,9 +1,6 @@
 // spi_displays/display.c
 #include "display.h"
 #include "py/mphal.h"
-#include "py/objarray.h"
-#include "py/objtype.h"
-#include "extmod/virtpin.h"
 #ifdef PICO_BOARD
     #include "hardware/spi.h"
 #endif
@@ -18,7 +15,7 @@
 #define DC_LOW(self)  mp_hal_pin_write((self)->dc, 0)
 #define DC_HIGH(self) mp_hal_pin_write((self)->dc, 1)
 
-void spi_write(mp_obj_t spi_obj, const uint8_t *data, size_t len) {
+void spi_write(mp_obj_t spi_obj, const uint8_t* data, size_t len) {
     if (len == 0) return;
     mp_obj_base_t *s = (mp_obj_base_t *)MP_OBJ_TO_PTR(spi_obj);
     mp_machine_spi_p_t *spi_p = (mp_machine_spi_p_t *)MP_OBJ_TYPE_GET_SLOT(s->type, protocol);
@@ -29,13 +26,13 @@ void spi_write(mp_obj_t spi_obj, const uint8_t *data, size_t len) {
 
 void display_write_cmd_data(mp_display_obj_t *self, uint8_t cmd, const uint8_t *data, size_t data_len) {
     if (self->debug >= 2) {
-        mp_printf(&mp_plat_print, "CMD: 0x%02X", cmd);
+        mp_printf(&mp_plat_print, "spi > 0x%02X", cmd);
         if (data_len > 0) {
-            mp_printf(&mp_plat_print, " DATA:");
+            mp_printf(&mp_plat_print, " |");
             for (size_t i = 0; i < data_len && i < 8; i++) {
                 mp_printf(&mp_plat_print, " %02X", data[i]);
             }
-            if (data_len > 8) mp_printf(&mp_plat_print, "...");
+            if (data_len > 8) mp_printf(&mp_plat_print, " ...");
         }
         mp_printf(&mp_plat_print, "\n");
     }
@@ -93,6 +90,7 @@ mp_obj_t display_show(mp_obj_t self_in) {
     }
     return mp_const_none;
 }
+
 MP_DEFINE_CONST_FUN_OBJ_1(display_show_obj, display_show);
 
 // ---------- Base constructor ----------
@@ -114,20 +112,20 @@ mp_obj_t display_make_new_base(const mp_obj_type_t *type, size_t n_args, size_t 
         ARG_debug,
     };
     static const mp_arg_t allowed_args[] = {
-        { MP_QSTR_spi,                   MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_width,                 MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_height,                MP_ARG_REQUIRED | MP_ARG_INT },
-        { MP_QSTR_rotate,                MP_ARG_INT,  {.u_int = 0} },
-        { MP_QSTR_x_offset,              MP_ARG_INT,  {.u_int = 0} },
-        { MP_QSTR_y_offset,              MP_ARG_INT,  {.u_int = 0} },
-        { MP_QSTR_bgr,                   MP_ARG_BOOL, {.u_bool = false} },
-        { MP_QSTR_inverse,               MP_ARG_BOOL, {.u_bool = false} },
-        { MP_QSTR_dc,                    MP_ARG_REQUIRED | MP_ARG_OBJ },
-        { MP_QSTR_cs,                    MP_ARG_OBJ,  {.u_obj = MP_OBJ_NULL} },
-        { MP_QSTR_rst,                   MP_ARG_OBJ,  {.u_obj = MP_OBJ_NULL} },
-        { MP_QSTR_bl,                    MP_ARG_OBJ,  {.u_obj = MP_OBJ_NULL} },
-        { MP_QSTR_backlight_active_high, MP_ARG_BOOL, {.u_bool = true} },
-        { MP_QSTR_debug,                 MP_ARG_INT,  {.u_int = 0} },
+        {MP_QSTR_spi, MP_ARG_REQUIRED | MP_ARG_OBJ},
+        {MP_QSTR_width, MP_ARG_REQUIRED | MP_ARG_INT},
+        {MP_QSTR_height, MP_ARG_REQUIRED | MP_ARG_INT},
+        {MP_QSTR_rotate, MP_ARG_INT, {.u_int = 0}},
+        {MP_QSTR_x_offset, MP_ARG_INT, {.u_int = 0}},
+        {MP_QSTR_y_offset, MP_ARG_INT, {.u_int = 0}},
+        {MP_QSTR_bgr, MP_ARG_BOOL, {.u_bool = false}},
+        {MP_QSTR_inverse, MP_ARG_BOOL, {.u_bool = false}},
+        {MP_QSTR_dc, MP_ARG_REQUIRED | MP_ARG_OBJ},
+        {MP_QSTR_cs, MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL}},
+        {MP_QSTR_rst, MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL}},
+        {MP_QSTR_bl, MP_ARG_OBJ, {.u_obj = MP_OBJ_NULL}},
+        {MP_QSTR_backlight_active_high, MP_ARG_BOOL, {.u_bool = true}},
+        {MP_QSTR_debug, MP_ARG_INT, {.u_int = 0}},
     };
     mp_arg_val_t args[MP_ARRAY_SIZE(allowed_args)];
     mp_arg_parse_all_kw_array(n_args, n_kw, all_args, MP_ARRAY_SIZE(allowed_args), allowed_args, args);
@@ -224,7 +222,7 @@ void display_attr(mp_obj_t self_in, qstr attr, mp_obj_t *dest) {
                 mp_map_elem_t *elem = mp_map_lookup(&locals_dict->map, MP_OBJ_NEW_QSTR(attr), MP_MAP_LOOKUP);
                 if (elem != NULL) {
                     dest[0] = elem->value;
-                    dest[1] = self_in;  // bound method
+                    dest[1] = self_in; // bound method
                     return;
                 }
             }
@@ -236,7 +234,6 @@ void display_attr(mp_obj_t self_in, qstr attr, mp_obj_t *dest) {
                     if (p_elem != NULL) {
                         dest[0] = p_elem->value;
                         dest[1] = self_in;
-                        return;
                     }
                 }
             }
